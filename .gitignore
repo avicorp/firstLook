@@ -1,6 +1,6 @@
 # assets image
 assets/
-
+data/cvl.str/*
 .idea/
 
 # Byte-compiled / optimized / DLL files
