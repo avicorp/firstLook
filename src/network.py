@@ -136,6 +136,14 @@ class Network(object):
         \partial a for the output activations."""
         return (output_activations-y)
 
+    def export_net(self):
+        return self.num_layers, self.sizes, self.biases, self.weights
+
+    def import_net(self, num_layers, sizes, biases, weights):
+        self.num_layers = num_layers
+        self.sizes = sizes
+        self.biases = biases
+        self.weights = weights
 
 #### Miscellaneous functions
 def sigmoid(z):
