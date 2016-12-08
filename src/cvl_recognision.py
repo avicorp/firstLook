@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 from skimage.morphology import skeletonize
 from scipy.misc import imresize
-from scipy import signal
+from scipy import ndimage
 
 def step_function(x):
     if x > 50 or (1 > x > 0.3):
@@ -62,6 +62,16 @@ def center_content(window, seg, centerX):
         return np.concatenate((marginXMat, centerWindow, shiftMat), axis=1)
 
 
+def center_content_by_mass(window):
+    centerOfMass = ndimage.measurements.center_of_mass(window)
+    marginX = int(14 - window.shape[0]/2)
+    marginY = 14 - int(centerOfMass[1])
+    marginXMatStart = np.zeros((window.shape[0], marginY))
+    marginXMatEnd = np.zeros((window.shape[0], 28 - window.shape[1] - marginY))
+    marginYMatStart = np.zeros((marginX, 28))
+    marginYMatEnd = np.zeros(((28 -window.shape[0] -marginX), 28))
+    centerWindow = np.concatenate((marginXMatStart, window, marginXMatEnd), axis=1)
+    return np.concatenate((marginYMatStart, centerWindow, marginYMatEnd), axis=0)
 
 # convert cvl to 28X28 windows
 net = network_loader.load_network()
@@ -69,7 +79,7 @@ cvl_images, cvl_labels = cvl_loader.load_data()
 kernel = np.ones((3, 3), np.float32) / 3
 kernel[1][1] = 1
 
-for i in range(0,40):
+for i in range(0,3):
     size = cvl_images[i][1]
     pixel_values = np.array(cvl_images[i][0])
     pixel_matrix = pixel_values.reshape((size[1], size[0]))
@@ -83,24 +93,22 @@ for i in range(0,40):
 
     for idx, seg in enumerate(segX):
         window = getWindow(pixel_matrix, seg)
-        centerWindow = center_content(window, seg, np.average(range(1,seg[1]+1-seg[0]), axis=0,  weights=hist[seg[0]:seg[1]]))
+        if (window.shape[0] <= 28):
+            centerWindow = center_content_by_mass(window)
 
-        skeletonImage = ((imresize(centerWindow, (28, 28),  interp='bicubic')))#binarization#skeletonize
-        #blurImage = signal.convolve(skeletonImage, kernel, mode='same')
+            plt.imshow(window)
+            plt.imshow(centerWindow)
+            result = net.feedforward(centerWindow.reshape(28 * 28, 1))
 
-        plt.imshow(centerWindow)
-        plt.imshow(skeletonImage)
-        result = net.feedforward(skeletonImage.reshape(28 * 28, 1))
-
-        # pprint.pprint(np.amax(result))
-        # pprint.pprint(np.argmax(result))
-        average = average + np.amax(result)
-        number = number * 10 + np.argmax(result)
+            # pprint.pprint(np.amax(result))
+            # pprint.pprint(np.argmax(result))
+            average = average + np.amax(result)
+            number = number * 10 + np.argmax(result)
 
     print "-----------{0}-------------".format(i)
     print "Label: {0} Result: {1} average: {2}".format(
         cvl_labels[i], number, average/len(segX))
-
+#
 # Naive
 # for i in range(0, size[0] - 28):
 #     if len(set(pixel_matrix[i, 0:28])) != 1:
