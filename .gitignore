@@ -2,6 +2,7 @@
 assets/
 data/cvl.str/*
 .idea/
+*.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
