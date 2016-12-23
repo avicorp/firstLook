@@ -1,0 +1,18 @@
+#### Libraries
+# Standard library
+import math
+
+# Third-party libraries
+from matplotlib import pyplot as plt
+from skimage import io
+from skimage import transform as tf
+import numpy as np
+
+
+def hist_image_by_angle(image, angle):
+    # Create Afine transform
+    afine_tf = tf.AffineTransform(shear= math.tan(math.radians(angle)))
+
+    # Apply transform to image data
+    return np.sum(tf.warp(image, afine_tf), axis=0)
+
