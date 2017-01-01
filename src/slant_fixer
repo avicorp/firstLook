@@ -3,16 +3,109 @@
 import math
 
 # Third-party libraries
-from matplotlib import pyplot as plt
-from skimage import io
+# from skimage import io
+import cv2
 from skimage import transform as tf
 import numpy as np
+from scipy import stats
+
+
+# cvl_images, cvl_labels = cvl_loader.load_data(5)
+
+# img = cv2.imread('../data/cvl.str/25000-0001-08.png')
+# gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+# edges = cv2.Canny(gray,50,150,apertureSize = 3)
+# minLineLength = 4
+# maxLineGap = 5
+# lines = cv2.HoughLinesP(gray,1,np.pi/90,100, minLineLength,maxLineGap)
+#
+# print lines.size
+#
+# for line_s in lines:
+#     print line_s
+#     for x1,y1,x2,y2 in line_s:
+#         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+#
+# cv2.imwrite('../data/cvl.str/25000-0001-08HougP.png',img)
+
+def softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
 
 
 def hist_image_by_angle(image, angle):
     # Create Afine transform
-    afine_tf = tf.AffineTransform(shear= math.tan(math.radians(angle)))
+    afine_tf = tf.AffineTransform(shear=math.tan(math.radians(angle)))
 
     # Apply transform to image data
-    return np.sum(tf.warp(image, afine_tf), axis=0)
+    return tf.warp(image, afine_tf, preserve_range=True)
 
+
+spectrom = 0.45
+fix = 0.35
+img = cv2.imread('../data/cvl.str/25000-0001-08.png')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+lines = cv2.HoughLines(edges, 1, np.pi / 90, 5)
+thetas = np.zeros((img.shape[1], 360))
+hist = np.sum(img, axis=0)
+
+for line_s in lines:
+    for rho, theta in line_s:
+        if (((spectrom - fix < theta < spectrom) or
+                 (np.pi - spectrom < theta < np.pi - spectrom + fix))):  # and
+            # ((rho > 50 and rho < 100) or (rho > -70 and rho < -40))):
+            # (rho > -40 and rho <50)):
+            #  (rho < -70 or rho > 100)):
+            # thetas = np.append(thetas, np.rad2deg(theta))
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * (a))
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * (a))
+
+            x = int((14 * b + rho) / a)
+
+            angle = int(np.rad2deg(theta))
+
+            if 0 < x < img.shape[1]:
+                thetas[x, angle] += 1
+
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, int(theta * 255 / np.pi)), 2)
+
+print np.amax(thetas, axis=1)
+
+# thetas = thetas.astype(int)
+# (thetas, counts) = np.unique(thetas, return_counts=True)
+# ind = np.argmax(counts)
+#
+# counts = stats.threshold(counts, 8)
+#
+# print thetas
+# print counts
+# print thetas[ind]
+# print np.average(thetas, weights=counts)
+# angle = int(np.average(thetas, weights=counts))
+#
+# cv2.imwrite('../data/cvl.str/25000-0001-08Fix.png', hist_image_by_angle(img, angle))
+#
+# cv2.imwrite('../data/cvl.str/25000-0001-08Houg.png', img)
+
+
+
+# angleRange = range(-20,20)
+
+# def hist_image_by_angle(image, angle):
+#     # Create Afine transform
+#     afine_tf = tf.AffineTransform(shear= math.tan(math.radians(angle)))
+#
+#     # Apply transform to image data
+#     return np.sum(tf.warp(image, afine_tf), axis=0)
+#
+# def slant_by_segment(image):
+#     for angle in angleRange:

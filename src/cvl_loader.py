@@ -6,11 +6,11 @@ import gzip
 # Third-party libraries
 import numpy as np
 
-def load_data():
+def load_data(pklsize):
     """Return a tuple containing ``(image_data, label_data)``
     image_data contain array of tuple (image, size(width, height))"""
 
-    f = gzip.open('../data/cvlS.str.pkl.gz', 'rb')
+    f = gzip.open('../data/cvl' + pklsize.__str__() + '.str.pkl.gz', 'rb')
     images_data, lable_data = cPickle.load(f)
     f.close()
     return (images_data, lable_data)

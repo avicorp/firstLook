@@ -10,6 +10,8 @@ from resizeimage import resizeimage
 import numpy as np
 
 
+
+
 def readFilesName(path):
     return [f for f in listdir(path) if isfile(join(path, f))]
 
@@ -21,20 +23,20 @@ def arrayOfPngFile(file):
 
     return [1 - (np.average(pixel) / 255.0) for pixel in pixel_values], im.size
 
-def convert():
+def convert(pklSize):
     fileList = readFilesName("../data/cvl.str")
 
-    cvlstr = ([arrayOfPngFile(file) for file in fileList[0:40]],
-            [file.split("-",1)[0] for file in fileList[0:40]])
+    cvlstr = ([arrayOfPngFile(file) for file in fileList[0:pklSize]],
+            [file.split("-",1)[0] for file in fileList[0:pklSize]])
 
-    output = open('../data/cvlS.str.pkl', 'w')
+    output = open('../data/cvl' + pklSize.__str__() + '.str.pkl', 'w')
 
     # Pickle dictionary using protocol 0.
     cPickle.dump(cvlstr, output)
 
     output.close()
 
-    with open('../data/cvlS.str.pkl', 'r') as f_in, gzip.open('../data/cvlS.str.pkl.gz', 'w') as f_out:
+    with open('../data/cvl' + pklSize.__str__() + '.str.pkl', 'r') as f_in, gzip.open('../data/cvl' + pklSize.__str__() + '.str.pkl.gz', 'w') as f_out:
         shutil.copyfileobj(f_in, f_out)
 
 def readAndPrint():
@@ -58,4 +60,4 @@ def readMnistAndPrint():
     pprint.pprint(test_data)
 
 
-convert()
+convert(5)
