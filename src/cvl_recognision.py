@@ -75,7 +75,7 @@ def center_content_by_mass(window):
 
 # convert cvl to 28X28 windows
 net = network_loader.load_network()
-cvl_images, cvl_labels = cvl_loader.load_data()
+cvl_images, cvl_labels = cvl_loader.load_data(5)
 kernel = np.ones((3, 3), np.float32) / 3
 kernel[1][1] = 1
 
