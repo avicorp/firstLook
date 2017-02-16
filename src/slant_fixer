@@ -72,7 +72,7 @@ def imgLines(img, maxDegree, minDegree):
         for rho, theta in line_s:
             angle = int(np.rad2deg(theta))
             if (((minDegree < angle < maxDegree) or
-                     (180 - maxDegree < angle < 180 - minDegree))):
+                     (minDegree < 180 - angle < maxDegree))):
                 a = np.cos(theta)
                 b = np.sin(theta)
 
@@ -80,6 +80,18 @@ def imgLines(img, maxDegree, minDegree):
 
                 if 0 < x < img.shape[1]:
                     thetas[x, angle] += 1
+
+                x0 = a * rho
+                y0 = b * rho
+                x1 = int(x0 + 1000 * (-b))
+                y1 = int(y0 + 1000 * (a))
+                x2 = int(x0 - 1000 * (-b))
+                y2 = int(y0 - 1000 * (a))
+
+                cv2.line(img, (x1, y1), (x2, y2), (0, 0, int(theta * 255 / np.pi)), 2)
+
+    cv2.imwrite('../data/cvl.str/test.png', img)
+
     return thetas
 
 def segmentation(hist, thetas):
