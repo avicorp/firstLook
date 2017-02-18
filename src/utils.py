@@ -85,3 +85,35 @@ def distance(xi, yi, xii, yii):
 def line_length_is_grater_then(length, line):
     [x1, y1, x2, y2] = line
     return distance(x1, y1, x2, y2) > length
+
+
+# 2D gaussian mask - should give the same result as MATLAB's
+# fspecial('gaussian',[shape],[sigma])
+def matlab_style_gauss2D(shape=(3, 3), sigma=0.5):
+    m, n = [(ss - 1.) / 2. for ss in shape]
+    y, x = np.ogrid[-m:m + 1, -n:n + 1]
+    h = np.exp(-(x * x + y * y) / (2. * sigma * sigma))
+    h[h < np.finfo(h.dtype).eps * h.max()] = 0
+    sumh = h.sum()
+    if sumh != 0:
+        h /= sumh
+    return h
+
+
+# Tests
+# ----------
+# - Is matlab_style_gauss2D is close to matlab output
+#
+# result = matlab_style_gauss2D((6, 6), 0.5)
+#
+# expected = [[9.1013e-12, 2.7131e-08, 1.4813e-06, 1.4813e-06, 2.7131e-08, 9.1013e-12],
+#             [2.7131e-08, 8.0875e-05, 4.4156e-03, 4.4156e-03, 8.0875e-05, 2.7131e-08],
+#             [1.4813e-06, 4.4156e-03, 2.4108e-01, 2.4108e-01, 4.4156e-03, 1.4813e-06],
+#             [1.4813e-06, 4.4156e-03, 2.4108e-01, 2.4108e-01, 4.4156e-03, 1.4813e-06],
+#             [2.7131e-08, 8.0875e-05, 4.4156e-03, 4.4156e-03, 8.0875e-05, 2.7131e-08],
+#             [9.1013e-12, 2.7131e-08, 1.4813e-06, 1.4813e-06, 2.7131e-08, 9.1013e-12]]
+#
+#
+# print np.alltrue(np.isclose(result,expected,rtol=1e-04))
+
+#
