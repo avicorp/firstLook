@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 # Private libraries
+import compute_BIFs
 sys.path.append(os.path.abspath("../"))
 import utils
 
@@ -224,56 +225,71 @@ def fix_check_image(path):
 img_angle = cv2.imread('../../assets/Checks/1.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test1.png')
-# cv2.imwrite('test1.png', image2)
+# fined_lines_in_check(image2, 'test1.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.5)
+cv2.imwrite('test1.png', bifs*255/10)
 print angle == -2 #-2.213
 
 img_angle = cv2.imread('../../assets/Checks/2.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test2.png')
+# fined_lines_in_check(image2, 'test2.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.5)
+cv2.imwrite('test2.png', bifs*255/7)
 # cv2.imwrite('test2.png', image2)
 print angle == -2.5 #-2.423
 
 img_angle = cv2.imread('../../assets/Checks/3.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test3.png')
+# fined_lines_in_check(image2, 'test3.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.5)
+cv2.imwrite('test3.png', bifs*255/7)
 # cv2.imwrite('test3.png', image2)
 print angle == -1 #-1.054
 
 img_angle = cv2.imread('../../assets/Checks/4.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test4.png')
+# fined_lines_in_check(image2, 'test4.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.5)
+cv2.imwrite('test4.png', bifs*255/7)
 # cv2.imwrite('test4.png', image2)
 print angle == 0 #-0.969
 
 img_angle = cv2.imread('../../assets/Checks/5.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test5.png')
+# fined_lines_in_check(image2, 'test5.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.25)
+cv2.imwrite('test5.png', bifs*255/7)
 # cv2.imwrite('test5.png', image2)
 print angle == 0 #-0.138
 
 img_angle = cv2.imread('../../assets/Checks/6.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test6.png')
+# fined_lines_in_check(image2, 'test6.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.25)
+cv2.imwrite('test6.png', bifs*255/7)
 # cv2.imwrite('test6.png', image2)
 print angle == 1 #0.968
 
 img_angle = cv2.imread('../../assets/Checks/7.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test7.png')
+# fined_lines_in_check(image2, 'test7.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('test7.png', bifs*255/7)
 # cv2.imwrite('test7.png', image2)
 print angle == 0 #-0.549
 
 img_angle = cv2.imread('../../assets/Checks/8.png')
 angle = calculate_slant_angle_pp(img_angle)
 image2 = utils.rotate_image_by_angle(img_angle, angle)
-fined_lines_in_check(image2, 'test8.png')
+# fined_lines_in_check(image2, 'test8.png')
+[C, bifs] = compute_BIFs.computeBIFs(image2, 0.55)
+# cv2.imwrite('test8.png', bifs*255/7)
 # cv2.imwrite('test8.png', image2)
 print angle == 1.5 #1.317
 
