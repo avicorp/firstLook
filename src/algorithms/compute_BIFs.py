@@ -14,7 +14,6 @@ import scipy.ndimage as ndimage
 import Dt_gfilters
 
 sys.path.append(os.path.abspath("../"))
-import utils
 
 
 # COMPUTEBIFS - Computes basic images features
@@ -65,7 +64,7 @@ def computeBIFs(im, sigma=0.5, epsilon=1e-05):
     c[:, :, 5] = 2 ** (-1 / 2.0) * (mu - _lambda)
     c[:, :, 6] = mu
 
-    return [c[:, :].max(2), c[:, :].argmax(2)]
+    return [np.array(c[:, :].argmax(2)+1, dtype=np.uint8), jet]
 
 
 def gray_and_normalize(im):
@@ -77,7 +76,7 @@ def gray_and_normalize(im):
 
 # Tests
 # 8X8 Matrix
-image = cv2.imread('bifsTestImages/bif-test.png')
+# image = cv2.imread('bifsTestImages/bif-test.png')
 # image = [[0., 0., 0., 0., 0., 0., 0., 0.],
 #           [0., 0., 0., 0., 0., 0., 0., 0.],
 #           [0., 0., 0., 0., 0., 0., 0., 0.],
@@ -95,11 +94,12 @@ image = cv2.imread('bifsTestImages/bif-test.png')
 #           [ 0.,145,0.,0.,0.,0.,0.,145],
 #           [ 145,0.,145,145,145,0.,145,0.],
 #           [ 145,0.,0.,0.,0.,145,0.,0.]]
+#
+# [bifs, C] = computeBIFs(image,0.5)
 
-[C, bifs] = computeBIFs(image,0.5)
 
-print C
-print bifs+1
+# print C
+# print bifs+1
 # print [expectedC, expectedBifs]==computeBIFs(image)
 
 # Expected gray and normalize to return correct values for "bif-test" image
@@ -117,14 +117,14 @@ print bifs+1
 
 
 # Check if cv2.filter2D return the same result as imfilter of matlab
-matrix = [[ 145,0.,0.,0.,0.,0.,145,0.],
-          [ 0.,145,0.,0.,0.,0.,145,  0.],
-          [ 0.,0.,145,0.,0.,0.,145, 0.],
-          [ 0.,0.,0.,145,0.,145,0.,0.],
-          [ 0.,145,0.,0.,145,0.,0.,0.],
-          [ 0.,145,0.,0.,0.,0.,0.,145],
-          [ 145,0.,145,145,145,0.,145,0.],
-          [ 145,0.,0.,0.,0.,145,0.,0.]]
+# matrix = [[ 145,0.,0.,0.,0.,0.,145,0.],
+#           [ 0.,145,0.,0.,0.,0.,145,  0.],
+#           [ 0.,0.,145,0.,0.,0.,145, 0.],
+#           [ 0.,0.,0.,145,0.,145,0.,0.],
+#           [ 0.,145,0.,0.,145,0.,0.,0.],
+#           [ 0.,145,0.,0.,0.,0.,0.,145],
+#           [ 145,0.,145,145,145,0.,145,0.],
+#           [ 145,0.,0.,0.,0.,145,0.,0.]]
 #
 # matrix = [[0., 0., 0., 0., 0., 0., 0., 0.],
 #           [0., 0., 0., 0., 0., 0., 0., 0.],
