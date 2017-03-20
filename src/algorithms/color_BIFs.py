@@ -38,7 +38,8 @@ colorBifsMap = {
     20: hex_to_rgb("#aaffaa"),
     21: hex_to_rgb("#50ffaa"),
     22: hex_to_rgb("#ff8aaa"),
-    23: hex_to_rgb("#ffffff")
+    23: hex_to_rgb("#99ff99"),
+    30: hex_to_rgb("#ffffff")
 }
 
 

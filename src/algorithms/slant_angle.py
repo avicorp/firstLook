@@ -8,9 +8,6 @@ import cv2
 import numpy as np
 
 # Private libraries
-import compute_BIFs
-import compute_OBIFs
-import color_BIFs
 sys.path.append(os.path.abspath("../"))
 import utils
 
@@ -183,12 +180,19 @@ def calculate_slant_angle_matrix(image, threshold=5, axis=1, minDegree=5, maxDeg
 #         Input:
 #           - path, path for bank check image
 #         Output:
-#           - image,  fix image that contain only the check
-def fix_check_image(path):
+#           - image,  fix image of the check
+def fix_check(path):
     _check_img = cv2.imread(path)
-    _angle = calculate_slant_angle(_check_img, 300, 0, minDegree=0, maxDegree=180)
+    _angle = calculate_slant_angle_pp(_check_img)
+    _fix_check_img = utils.rotate_image_by_angle(_check_img, _angle)
 
-    return utils.rotate_image_by_angle(_check_img, _angle - 90)
+    _fix_check_img = np.array(_fix_check_img, dtype=np.uint8)
+    _gray = cv2.cvtColor(_fix_check_img, cv2.COLOR_BGR2GRAY)
+    ret3, _fix_binary_check_img = cv2.threshold(_gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return _fix_binary_check_img
+
+
 
 
 # def amount_extraction(check_img):
@@ -223,93 +227,93 @@ def fix_check_image(path):
 # img_matrix = cv2.imread('../../data/cvl.str/25000-0001-08.png')
 # angle_matrix = slant_angle_matrix(img_matrix)
 # print np.array_equal(angle_matrix, np.zeros((img_matrix.shape[1], 360)))
-
-img_angle = cv2.imread('../../assets/Checks/1.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test1.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif1.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif1.png',color_BIFs.bifs_to_color_image(obifs))
-print angle == -2 #-2.213
-
-img_angle = cv2.imread('../../assets/Checks/2.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test2.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif2.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif2.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test2.png', image2)
-print angle == -2.5 #-2.423
-
-img_angle = cv2.imread('../../assets/Checks/3.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test3.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif3.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif3.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test3.png', image2)
-print angle == -1 #-1.054
-
-img_angle = cv2.imread('../../assets/Checks/4.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test4.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif4.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif4.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test4.png', image2)
-print angle == 0 #-0.969
-
-img_angle = cv2.imread('../../assets/Checks/5.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test5.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif5.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif5.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test5.png', image2)
-print angle == 0 #-0.138
-
-img_angle = cv2.imread('../../assets/Checks/6.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test6.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif6.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif6.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test6.png', image2)
-print angle == 1 #0.968
-
-img_angle = cv2.imread('../../assets/Checks/7.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test7.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif7.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif7.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test7.png', image2)
-print angle == 0 #-0.549
-
-img_angle = cv2.imread('../../assets/Checks/8.png')
-angle = calculate_slant_angle_pp(img_angle)
-image2 = utils.rotate_image_by_angle(img_angle, angle)
-# fined_lines_in_check(image2, 'test8.png')
-[bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
-cv2.imwrite('bif8.png', color_BIFs.bifs_to_color_image(bifs))
-obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
-cv2.imwrite('Obif8.png',color_BIFs.bifs_to_color_image(obifs))
-# cv2.imwrite('test8.png', image2)
-print angle == 1.5 #1.317
+#
+# img_angle = cv2.imread('../../assets/Checks/1.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test1.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif1.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif1.png',color_BIFs.bifs_to_color_image(obifs))
+# print angle == -2 #-2.213
+#
+# img_angle = cv2.imread('../../assets/Checks/2.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test2.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif2.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif2.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test2.png', image2)
+# print angle == -2.5 #-2.423
+#
+# img_angle = cv2.imread('../../assets/Checks/3.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test3.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif3.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif3.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test3.png', image2)
+# print angle == -1 #-1.054
+#
+# img_angle = cv2.imread('../../assets/Checks/4.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test4.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif4.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif4.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test4.png', image2)
+# print angle == 0 #-0.969
+#
+# img_angle = cv2.imread('../../assets/Checks/5.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test5.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif5.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif5.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test5.png', image2)
+# print angle == 0 #-0.138
+#
+# img_angle = cv2.imread('../../assets/Checks/6.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test6.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif6.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif6.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test6.png', image2)
+# print angle == 1 #0.968
+#
+# img_angle = cv2.imread('../../assets/Checks/7.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test7.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif7.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif7.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test7.png', image2)
+# print angle == 0 #-0.549
+#
+# img_angle = cv2.imread('../../assets/Checks/8.png')
+# angle = calculate_slant_angle_pp(img_angle)
+# image2 = utils.rotate_image_by_angle(img_angle, angle)
+# # fined_lines_in_check(image2, 'test8.png')
+# [bifs, C] = compute_BIFs.computeBIFs(image2, 0.5)
+# cv2.imwrite('bif8.png', color_BIFs.bifs_to_color_image(bifs))
+# obifs = compute_OBIFs.computeOBIFs(image2, 0.5)
+# cv2.imwrite('Obif8.png',color_BIFs.bifs_to_color_image(obifs))
+# # cv2.imwrite('test8.png', image2)
+# print angle == 1.5 #1.317
 
 
 # image2 = utils.rotate_image_by_angle(img_angle, angle - 90)

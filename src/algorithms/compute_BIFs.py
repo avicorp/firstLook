@@ -68,10 +68,10 @@ def computeBIFs(im, sigma=0.5, epsilon=1e-05):
 
 
 def gray_and_normalize(im):
-    im = np.array(im, dtype=np.uint8)
-    gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    # im = np.array(im, dtype=np.uint8)
+    # gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     # Normalize
-    return np.array(gray, dtype=np.float64) / 255.0
+    return np.array(im, dtype=np.float64) / 255.0
 
 
 # Tests
