@@ -1,5 +1,6 @@
 # assets image
 assets/
+src/algorithms/imageResults/
 data/cvl.str/*
 .idea/
 *.pkl
