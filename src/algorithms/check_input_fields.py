@@ -16,19 +16,24 @@ sys.path.append(os.path.abspath("../"))
 import utils
 
 
+template_png='algorithms/inputFields/template.png'
+amount_input_png='algorithms/inputFields/amount_template.png'
+date_input_png='algorithms/inputFields/date_template.png'
+
+
 def searchTemplateCenterPointIn(check, template, searchMap, step=1):
     fromIndex = [int(template.shape[0] / 2 + 1), int(template.shape[1] / 2 + 1)]
     toIndex = [int(searchMap.shape[0] - template.shape[0] / 2 + 1), int(searchMap.shape[1] - template.shape[1] / 2 + 1)]
 
     radios = [int(template.shape[0] / 2 + 1), int(template.shape[1] / 2)]
 
-    maxConv = 0
+    maxConv = -99999999
     maxCenterConv = [0, 0]
 
     for centerConvX in range(fromIndex[0], toIndex[0]):
         for centerConvY in range(fromIndex[1], toIndex[1]):
             if searchMap[centerConvX, centerConvY] == 1:
-                convMatrix = check[centerConvX - radios[0]:centerConvX + radios[0] - 1,
+                convMatrix = check[centerConvX - radios[0]:centerConvX + radios[0] - (2 - template.shape[0]%2),
                              centerConvY - radios[1]:centerConvY + radios[1]] \
                              * template
                 conv = np.sum(convMatrix)
@@ -39,25 +44,39 @@ def searchTemplateCenterPointIn(check, template, searchMap, step=1):
     return maxCenterConv
 
 
-def binaryTemplate():
-    img_template = cv2.imread('algorithms/inputFields/template.png')
-    image = np.array(img_template, dtype=np.uint8)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    ret3, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+def normalize(image):
+    binary = np.array(image, dtype=np.int8)
 
-    binary = np.array(binary, dtype=np.int8)
-
-    binary[binary == 0] = 1
-    binary[binary == 255] = -1
+    binary[image == 0] = 1
+    binary[image == 255] = -1
 
     return binary
 
 
+def binaryTemplate():
+    return template(template_png)
+
+
+def dateTemplate():
+    return template(date_input_png)
+
+
+def amountTemplate():
+    return template(amount_input_png)
+
+
 def binaryTemplateFix():
-    img_template = cv2.imread('algorithms/inputFields/template.png')
+    return template(template_png, False)
+
+
+def template(file_name, do_normalize=True):
+    img_template = cv2.imread(file_name)
     image = np.array(img_template, dtype=np.uint8)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     ret3, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    if do_normalize:
+        binary = normalize(binary)
 
     return binary
 
@@ -73,7 +92,7 @@ def extract(check):
     checkMap[check == 255] = -1
 
     searchFrom = [check.shape[0] / 2 - 10, check.shape[1] / 2 - 10]
-    searchTo = [check.shape[1] / 2 + 10, check.shape[1] / 2 + 10]
+    searchTo = [check.shape[0] / 2 + 100, check.shape[1] / 2 + 10]
 
     searchMatrix = np.zeros(check.shape, np.uint8)
     searchMatrix[int(searchFrom[0]):int(searchTo[0]), int(searchFrom[1]):int(searchTo[1])] = 1
@@ -89,6 +108,57 @@ def extract(check):
     return roi
 
 
+def extractAmount(input_fields):
+    template = amountTemplate()
+
+    template[template == -1] = 0
+
+    input_fields_map = normalize(input_fields)
+
+    amountX = 1018
+    amountY = 76
+
+    searchFrom = [amountY - 50, amountX - 100]
+    searchTo = [amountY + 100, amountX + 40]
+
+    searchMatrix = np.zeros(input_fields.shape, np.uint8)
+    searchMatrix[int(searchFrom[0]):int(searchTo[0]), int(searchFrom[1]):int(searchTo[1])] = 1
+
+    center = searchTemplateCenterPointIn(input_fields_map, template, searchMatrix)
+
+    inputFieldsRectangle = [[int(center[0] - 100), int(center[0] + 100)],
+                            [int(center[1] - 190), int(center[1] + 190)]]
+
+    roi = input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
+          inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]]
+
+    return roi
+
+def extractDate(input_fields):
+    template = dateTemplate()
+
+    input_fields_map = normalize(input_fields)
+
+    amountX = 683
+    amountY = 190
+
+    searchFrom = [amountY - 100, amountX - 100]
+    searchTo = [amountY + 100, amountX + 100]
+
+    searchMatrix = np.zeros(input_fields.shape, np.uint8)
+    searchMatrix[int(searchFrom[0]):int(searchTo[0]), int(searchFrom[1]):int(searchTo[1])] = 1
+
+    center = searchTemplateCenterPointIn(input_fields, template, searchMatrix)
+
+    inputFieldsRectangle = [[int(center[0] - 50), int(center[0] + 50)],
+                            [int(center[1] - 113), int(center[1] + 113)]]
+
+    roi = input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
+          inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]]
+
+    return roi
+
+
 def clean(check):
     input_fields = extract(check)
     input_fields_OBIFs = compute_OBIFs.computeOBIFs(input_fields)
@@ -96,7 +166,8 @@ def clean(check):
     empty_input_fields_OBIFs = compute_OBIFs.computeOBIFs(empty_input_fields)
 
     # input_fields[diff_map_not] = 255
-    input_fields[empty_input_fields == 0] = 255
+    input_fields_clone = np.copy(input_fields)
+    input_fields_clone[empty_input_fields == 0] = 255
     # clean_input_fields_OBIFs = compute_OBIFs.computeOBIFs(input_fields)
 
 
@@ -122,7 +193,7 @@ def clean(check):
 
     # diff_map[empty_input_fields != 0] = False
 
-    return input_fields
+    return input_fields_clone
 
 
 # Test

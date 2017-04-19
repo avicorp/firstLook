@@ -13,7 +13,6 @@ import algorithms.check_input_fields as check_input_fields
 
 
 class BankCheck:
-    kind = 'canine'  # class variable shared by all instances
 
     def __init__(self, path):
         self.checkImage = slant_angle.fix_check(path)
@@ -24,6 +23,12 @@ class BankCheck:
     def cleanInputFields(self):
         return check_input_fields.clean(self.checkImage)
 
+    def amountField(self):
+        return check_input_fields.extractAmount(self.inputFields())
+
+    def dateField(self):
+        return check_input_fields.extractDate(self.inputFields())
+
     def saveInputFields(self, name, clean=False):
         if clean:
             cv2.imwrite(name, self.cleanInputFields())
@@ -33,24 +38,40 @@ class BankCheck:
 
 check1 = BankCheck('../assets/Checks/1.png')
 check1.saveInputFields('checkInputFields1.png', True)
+cv2.imwrite('amountFields1.png', check1.amountField())
+# cv2.imwrite('dateFields1.png', check1.dateField())
 
 check1 = BankCheck('../assets/Checks/2.png')
 check1.saveInputFields('checkInputFields2.png', True)
+cv2.imwrite('amountFields2.png', check1.amountField())
+# cv2.imwrite('dateFields2.png', check1.dateField())
 
 check1 = BankCheck('../assets/Checks/3.png')
 check1.saveInputFields('checkInputFields3.png', True)
+cv2.imwrite('amountFields3.png', check1.amountField())
+# cv2.imwrite('dateFields3.png', check1.dateField())
 
-check1 = BankCheck('../assets/Checks/4.png')
-check1.saveInputFields('checkInputFields4.png', True)
-
-check1 = BankCheck('../assets/Checks/5.png')
-check1.saveInputFields('checkInputFields5.png', True)
-
-check1 = BankCheck('../assets/Checks/6.png')
-check1.saveInputFields('checkInputFields6.png', True)
-
-check1 = BankCheck('../assets/Checks/7.png')
-check1.saveInputFields('checkInputFields7.png', True)
-
-check1 = BankCheck('../assets/Checks/8.png')
-check1.saveInputFields('checkInputFields8.png', True)
+# check1 = BankCheck('../assets/Checks/4.png')
+# check1.saveInputFields('checkInputFields4.png', True)
+# cv2.imwrite('amountFields4.png', check1.amountField())
+# cv2.imwrite('dateFields4.png', check1.dateField())
+#
+# check1 = BankCheck('../assets/Checks/5.png')
+# check1.saveInputFields('checkInputFields5.png', True)
+# cv2.imwrite('amountFields5.png', check1.amountField())
+# cv2.imwrite('dateFields5.png', check1.dateField())
+#
+# check1 = BankCheck('../assets/Checks/6.png')
+# check1.saveInputFields('checkInputFields6.png', True)
+# cv2.imwrite('amountFields6.png', check1.amountField())
+# cv2.imwrite('dateFields6.png', check1.dateField())
+#
+# check1 = BankCheck('../assets/Checks/7.png')
+# check1.saveInputFields('checkInputFields7.png', True)
+# cv2.imwrite('amountFields7.png', check1.amountField())
+# cv2.imwrite('dateFields7.png', check1.dateField())
+#
+# check1 = BankCheck('../assets/Checks/8.png')
+# check1.saveInputFields('checkInputFields8.png', True)
+# cv2.imwrite('amountFields8.png', check1.amountField())
+# cv2.imwrite('dateFields8.png', check1.dateField())
