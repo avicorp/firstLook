@@ -54,31 +54,23 @@ def normalize(image):
 
 
 def binaryTemplate():
-    return template(template_png)
+    img_template = cv2.imread(template_png)
+    return utils.sanitize(img_template)
 
 
 def dateTemplate():
-    return template(date_input_png)
+    img_template = cv2.imread(date_input_png)
+    return utils.sanitize(img_template)
 
 
 def amountTemplate():
-    return template(amount_input_png)
+    img_template = cv2.imread(amount_input_png)
+    return utils.sanitize(img_template)
 
 
 def binaryTemplateFix():
-    return template(template_png, False)
-
-
-def template(file_name, do_normalize=True):
-    img_template = cv2.imread(file_name)
-    image = np.array(img_template, dtype=np.uint8)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    ret3, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-    if do_normalize:
-        binary = normalize(binary)
-
-    return binary
+    img_template = cv2.imread(template_png)
+    return utils.sanitize(img_template, False)
 
 
 # Extract input fields, the Region Of Interest (ROI), from bank check.
@@ -116,21 +108,33 @@ def extractAmount(input_fields):
     input_fields_map = normalize(input_fields)
 
     amountX = 1018
-    amountY = 76
+    amountY = 96
 
-    searchFrom = [amountY - 50, amountX - 100]
-    searchTo = [amountY + 100, amountX + 40]
+    searchFrom = [amountY - 50, amountX - 50]
+    searchTo = [amountY + 50, amountX + 50]
 
     searchMatrix = np.zeros(input_fields.shape, np.uint8)
     searchMatrix[int(searchFrom[0]):int(searchTo[0]), int(searchFrom[1]):int(searchTo[1])] = 1
 
     center = searchTemplateCenterPointIn(input_fields_map, template, searchMatrix)
 
-    inputFieldsRectangle = [[int(center[0] - 100), int(center[0] + 100)],
-                            [int(center[1] - 190), int(center[1] + 190)]]
+    inputFieldsRectangle = [[int(center[0] - template.shape[0]/2), int(center[0] + template.shape[0]/2)],
+                            [int(center[1] - template.shape[1]/2), int(center[1] + template.shape[1]/2)]]
+
+    template[template == 0] = -1
+    template[template == 1] = 0
+    input_fields_clean = cleanBy(input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
+          inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]], template)
+
+    inputFieldsRectangle[1][1] = input_fields.shape[1] if inputFieldsRectangle[1][1] + 50 > input_fields.shape[1] \
+        else inputFieldsRectangle[1][1] + 50
+
+    inputFieldsRectangle[0][0] -= 20
 
     roi = input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
           inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]]
+
+    roi[20:roi.shape[0], 0:input_fields_clean.shape[1]] = input_fields_clean
 
     return roi
 
@@ -166,8 +170,7 @@ def clean(check):
     empty_input_fields_OBIFs = compute_OBIFs.computeOBIFs(empty_input_fields)
 
     # input_fields[diff_map_not] = 255
-    input_fields_clone = np.copy(input_fields)
-    input_fields_clone[empty_input_fields == 0] = 255
+    input_fields_clone = cleanBy(input_fields, empty_input_fields)
     # clean_input_fields_OBIFs = compute_OBIFs.computeOBIFs(input_fields)
 
 
@@ -195,6 +198,27 @@ def clean(check):
 
     return input_fields_clone
 
+
+def cleanBy(image, template_image):
+    image_clone = np.copy(image)
+    image_clone[template_image == 0] = 255
+
+    # kernel = np.zeros((5, 5), np.float16)
+    # kernel[1][1] = 1/6.
+    # kernel[1][2] = 1/6.
+    # kernel[1][3] = 1/6.
+    # kernel[3][2] = 1/6.
+    # kernel[3][2] = 1/6.
+    # kernel[3][3] = 1/6.
+    #
+    #
+    # pixel_matrix = ndimage.filters.convolve(image_clone, kernel, mode='constant')
+    # cv2.imwrite('test1.png', pixel_matrix)
+    #
+    # pixel_matrix[template_image != 0] = 255
+
+
+    return image_clone
 
 # Test
 # img_template = cv2.imread('inputFields/templateFix1.png')

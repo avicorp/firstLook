@@ -100,6 +100,26 @@ def matlab_style_gauss2D(shape=(3, 3), sigma=0.5):
     return h
 
 
+def normalize(image):
+    binary = np.array(image, dtype=np.int8)
+
+    binary[image == 0] = 1
+    binary[image == 255] = -1
+
+    return binary
+
+
+def sanitize(img, do_normalize=True):
+    image = np.array(img, dtype=np.uint8)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    ret3, sanitize_img = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    if do_normalize:
+        sanitize_img = normalize(sanitize_img)
+
+    return sanitize_img
+
+
 # Tests
 # ----------
 # - Is matlab_style_gauss2D is close to matlab output

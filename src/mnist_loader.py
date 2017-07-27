@@ -19,7 +19,8 @@ import gzip
 
 # Third-party libraries
 import numpy as np
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+
 
 def load_data():
     """Return the MNIST data as a tuple containing the training data,
@@ -48,6 +49,14 @@ def load_data():
     training_data, validation_data, test_data = cPickle.load(f)
     f.close()
     return (training_data, validation_data, test_data)
+
+
+def load_data_from(file):
+    f = gzip.open(file, 'rb')
+    training_data, validation_data, test_data = cPickle.load(f)
+    f.close()
+    return (training_data, validation_data, test_data)
+
 
 def load_data_wrapper():
     """Return a tuple containing ``(training_data, validation_data,
@@ -80,6 +89,19 @@ def load_data_wrapper():
     test_data = zip(test_inputs, te_d[1])
     return (training_data, validation_data, test_data)
 
+
+def load_data_wrapper_by(input_size, file):
+    tr_d, va_d, te_d = load_data_from(file)
+    training_inputs = [np.reshape(x, (input_size, 1)) for x in tr_d[0]]
+    training_results = [vectorized_result(y) for y in tr_d[1]]
+    training_data = zip(training_inputs, training_results)
+    validation_inputs = [np.reshape(x, (input_size, 1)) for x in va_d[0]]
+    validation_data = zip(validation_inputs, va_d[1])
+    test_inputs = [np.reshape(x, (input_size, 1)) for x in te_d[0]]
+    test_data = zip(test_inputs, te_d[1])
+    return (training_data, validation_data, test_data)
+
+
 def vectorized_result(j):
     """Return a 10-dimensional unit vector with a 1.0 in the jth
     position and zeroes elsewhere.  This is used to convert a digit
@@ -90,5 +112,5 @@ def vectorized_result(j):
     return e
 
 
-training_data, validation_data, test_data = load_data()
-plt.imshow(training_data[0])
+# training_data, validation_data, test_data = load_data()
+# plt.imshow(training_data[0])

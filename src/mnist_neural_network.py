@@ -3,6 +3,8 @@ import network
 import cPickle
 import gzip
 import shutil
+import cv2
+import numpy as np
 
 
 def save_network(_):
@@ -17,9 +19,18 @@ def save_network(_):
         shutil.copyfileobj(f_in, f_out)
 
 
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
-net = network.Network([784, 100, 10])
+def save_images(training_data):
+    images = [(img.reshape(28, 28), name) for (img, name) in training_data]
+    [cv2.imwrite(str(np.argmax(name)) + ".png", (image*255).astype(int)) for (image, name) in images[0:10]]
 
-net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 
-save_network(net.export_net())
+def neural_network_build():
+    training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+    net = network.Network([784, 100, 10])
+
+    net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+
+    save_network(net.export_net())
+
+
+neural_network_build()
