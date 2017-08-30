@@ -21,31 +21,32 @@ amount_input_png='algorithms/inputFields/amount_template.png'
 date_input_png='algorithms/inputFields/date_template.png'
 
 
-def searchTemplateCenterPointIn(check, template, searchMap, step=1):
+def searchTemplateCenterPointIn(check, template, searchMap, step=1, threshold=-9999999):
     fromIndex = [int(template.shape[0] / 2 + 1), int(template.shape[1] / 2 + 1)]
-    toIndex = [int(searchMap.shape[0] - template.shape[0] / 2 + 1), int(searchMap.shape[1] - template.shape[1] / 2 + 1)]
+    toIndex = [int(searchMap.shape[0] - template.shape[0] / 2), int(searchMap.shape[1] - template.shape[1] / 2)]
 
-    radios = [int(template.shape[0] / 2 + 1), int(template.shape[1] / 2)]
+    radios = [int(template.shape[0] / 2), int(template.shape[1] / 2)]
 
-    maxConv = -99999999
+    maxConv = threshold
     maxCenterConv = [0, 0]
 
     for centerConvX in range(fromIndex[0], toIndex[0]):
         for centerConvY in range(fromIndex[1], toIndex[1]):
             if searchMap[centerConvX, centerConvY] == 1:
-                convMatrix = check[centerConvX - radios[0]:centerConvX + radios[0] - (2 - template.shape[0]%2),
-                             centerConvY - radios[1]:centerConvY + radios[1]] \
+                convMatrix = check[centerConvX - radios[0]:centerConvX + radios[0] + template.shape[0]%2,
+                             centerConvY - radios[1]:centerConvY + radios[1] + template.shape[1]%2] \
                              * template
                 conv = np.sum(convMatrix)
                 if maxConv < conv:
                     maxConv = conv
                     maxCenterConv = [centerConvX, centerConvY]
 
+    print maxConv
     return maxCenterConv
 
 
 def normalize(image):
-    binary = np.array(image, dtype=np.int8)
+    binary = np.array(image, dtype=np.int8, copy=True)
 
     binary[image == 0] = 1
     binary[image == 255] = -1
@@ -81,7 +82,7 @@ def extract(check):
     checkMap = np.array(check, dtype=np.int8)
 
     checkMap[check == 0] = 1
-    checkMap[check == 255] = -1
+    checkMap[check > 0] = -1
 
     searchFrom = [check.shape[0] / 2 - 10, check.shape[1] / 2 - 10]
     searchTo = [check.shape[0] / 2 + 100, check.shape[1] / 2 + 10]
@@ -100,7 +101,7 @@ def extract(check):
     return roi
 
 
-def extractAmount(input_fields):
+def extractAmount(input_fields, clean = True):
     template = amountTemplate()
 
     template[template == -1] = 0
@@ -116,6 +117,7 @@ def extractAmount(input_fields):
     searchMatrix = np.zeros(input_fields.shape, np.uint8)
     searchMatrix[int(searchFrom[0]):int(searchTo[0]), int(searchFrom[1]):int(searchTo[1])] = 1
 
+
     center = searchTemplateCenterPointIn(input_fields_map, template, searchMatrix)
 
     inputFieldsRectangle = [[int(center[0] - template.shape[0]/2), int(center[0] + template.shape[0]/2)],
@@ -123,6 +125,7 @@ def extractAmount(input_fields):
 
     template[template == 0] = -1
     template[template == 1] = 0
+    template[:,0:35] = 0
     input_fields_clean = cleanBy(input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
           inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]], template)
 
@@ -131,10 +134,11 @@ def extractAmount(input_fields):
 
     inputFieldsRectangle[0][0] -= 20
 
-    roi = input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
-          inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]]
+    roi = np.copy(input_fields[inputFieldsRectangle[0][0]:inputFieldsRectangle[0][1],
+          inputFieldsRectangle[1][0]:inputFieldsRectangle[1][1]])
 
-    roi[20:roi.shape[0], 0:input_fields_clean.shape[1]] = input_fields_clean
+    if clean:
+        roi[20:roi.shape[0], 0:input_fields_clean.shape[1]] = input_fields_clean
 
     return roi
 
@@ -200,6 +204,7 @@ def clean(check):
 
 
 def cleanBy(image, template_image):
+
     image_clone = np.copy(image)
     image_clone[template_image == 0] = 255
 

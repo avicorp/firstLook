@@ -1,6 +1,7 @@
 import network_loader
 import numpy as np
 import cv2
+import neural_networks.cnnLoader as cnnLoader
 
 from os import listdir
 from os.path import isfile, join
@@ -49,7 +50,7 @@ def complexFeedForward(img, network):
     complexResult += network.feedforward(number_filter(img, 5)) * 0.1
     complexResult += network.feedforward(number_filter(img, 6)) * 0.1
 
-    cv2.imwrite("Number_Window_temp" + global_index.__str__() + ".png", number_filter(img, 1, False))
+    cv2.imwrite("Menual_" + global_index.__str__() + ".png", number_filter(img, 1, False))
     global_index += 1
 
     return Result
@@ -57,24 +58,24 @@ def complexFeedForward(img, network):
 
 # convert cvl to 28X28 windows
 net = network_loader.load_network()
+cnnnet = cnnLoader.MNIST_CNN_Model()
+
 images, labels, fileNames =read_number_images('../assets/number-test-set/')
 
 graes = [cv2.cvtColor(im, cv2.COLOR_BGR2GRAY) for im in images]
-invers = [abs(255 - im) for im in graes]
-
-results = [complexFeedForward(im, net) for im in invers]
+invers = [[abs(255 - im)] for im in graes]
 
 
-parameters = [image_parameters(number_filter(im,1, False)) for im in invers]
+results = cnnnet.predict(invers)
 
 gesses = [np.argmax(result) for result in results]
 scores = [max(result)  for result in results]
 
-resultSet = zip(labels, gesses, scores, fileNames, results, invers, parameters)
+resultSet = zip(labels, gesses, scores, fileNames, results, invers)
 
 trashold = 0.0
 
-success = [int(gess == int(label) if (score > trashold) else 2) for (label, gess, score, file, result, im, parameter) in resultSet]
+success = [int(gess == int(label) if (score > trashold) else 2) for (label, gess, score, file, result, im) in resultSet]
 
 np.set_printoptions(suppress=True, precision=3)
 
@@ -87,28 +88,22 @@ standard_deviation_false = []
 standard_deviation_true = []
 
 print "False Positiv:"
-for (label, gess, score, file, result, im, parameter) in resultSet:
+for (label, gess, score, file, result, im) in resultSet:
     if score > trashold and gess != int(label):
-        standard_deviation_false.append(parameter[1])
         # cv2.imwrite("test.png", im)
-        print '{0}: {1}  {2}   {3}'.format(file, gess, parameter, np.transpose(result))
+        print '{0}: {1}  {2}'.format(file, gess, np.transpose(result))
 
 
 print "True Positiv:"
-for (label, gess, score, file, result, im, parameter) in resultSet:
+for (label, gess, score, file, result, im) in resultSet:
     if score > trashold and gess == int(label):
-        standard_deviation_true.append(parameter[1])
-        print '{0}: {1}  {2}   {3}'.format(file, gess, parameter, np.transpose(result))
+        print '{0}: {1}  {2}'.format(file, gess, np.transpose(result))
 
 print "Fail:"
-for (label, gess, score, file, result, im, parameter) in resultSet:
+for (label, gess, score, file, result, im) in resultSet:
     if score <= trashold:
         # cv2.imwrite("test.png", im)
-        print '{0}: {1}  {2}   {3}'.format(file, gess, parameter, np.transpose(result))
-
-
-standard_deviation_false = np.array(standard_deviation_false)
-standard_deviation_true = np.array(standard_deviation_true)
+        print '{0}: {1}  {2}'.format(file, gess, np.transpose(result))
 
 # for (im, label) in testSet:
 #     print "__________"

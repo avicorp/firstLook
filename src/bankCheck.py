@@ -25,8 +25,8 @@ class BankCheck:
     def cleanInputFields(self):
         return check_input_fields.clean(self.checkImage)
 
-    def amountField(self):
-        return check_input_fields.extractAmount(self.inputFields())
+    def amountField(self, clean=True):
+        return check_input_fields.extractAmount(self.inputFields(), clean)
 
     def dateField(self):
         return check_input_fields.extractDate(self.inputFields())
